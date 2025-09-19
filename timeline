@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Animated Colorful Timeline</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0d1b2a;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { margin-bottom: 10px; }
+    .controls { margin-bottom: 20px; }
+    input, button {
+      padding: 8px;
+      margin: 5px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+    }
+    input { width: 180px; }
+    button {
+      cursor: pointer;
+      background: #0077b6;
+      color: white;
+      transition: 0.3s;
+    }
+    button:hover { background: #00b4d8; }
+    .timeline {
+      margin: auto;
+      max-width: 800px;
+      text-align: left;
+      position: relative;
+      padding-left: 40px;
+    }
+    .entry {
+      background: #1b263b;
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 10px;
+      position: relative;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: bold;
+    }
+    .entry::before {
+      content: "";
+      position: absolute;
+      left: -24px;
+      top: 20px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--dot-color, #ff006e);
+    }
+    .entry span {
+      display: inline-block;
+      padding: 6px 12px;
+      margin-right: 10px;
+      border-radius: 8px;
+      background: #003566;
+      font-weight: bold;
+      color: #fff;
+    }
+    .actions button {
+      background: #e63946;
+      margin-left: 5px;
+      padding: 4px 8px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .actions button.edit { background: #f77f00; }
+    .entry-text { flex-grow: 1; }
+  </style>
+</head>
+<body>
+  <h1>Animated Colorful Timeline</h1>
+  <p>Add unlimited year, optional date & event entries — auto-sorted ascending.</p>
+
+  <div class="controls">
+    <input type="number" id="yearInput" placeholder="Year (e.g. 2024)">
+    <input type="text" id="dateInput" placeholder="Date (optional, e.g. 12 Jan)">
+    <input type="text" id="eventInput" placeholder="Event description">
+    <button onclick="addEntry()">Add</button>
+    <button onclick="exportJSON()">Export JSON</button>
+    <button onclick="importJSON()">Import JSON</button>
+    <button onclick="clearAll()">Clear All</button>
+    <button onclick="exportPNG()">Export PNG</button>
+    <button onclick="exportPDF()">Export PDF</button>
+  </div>
+
+  <div class="timeline" id="timeline"></div>
+
+  <script>
+    let entries = [];
+
+    function getRandomColor() {
+      const colors = ["#ff006e","#8338ec","#3a86ff","#06d6a0","#ffd60a","#ff7b00","#8ac926","#ff595e"];
+      return colors[Math.floor(Math.random()*colors.length)];
+    }
+
+    function renderTimeline() {
+      const container = document.getElementById("timeline");
+      container.innerHTML = "";
+      entries.sort((a, b) => a.year - b.year);
+      entries.forEach((entry, index) => {
+        const div = document.createElement("div");
+        div.className = "entry";
+        div.style.setProperty("--dot-color", entry.color);
+
+        let dateText = entry.date ? ` (${entry.date})` : "";
+        div.innerHTML = `
+          <span>${entry.year}</span>
+          <div class="entry-text">${entry.text}${dateText}</div>
+          <div class="actions">
+            <button class="edit" onclick="editEntry(${index})">✎</button>
+            <button onclick="deleteEntry(${index})">✕</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function addEntry() {
+      const year = document.getElementById("yearInput").value;
+      const date = document.getElementById("dateInput").value;
+      const text = document.getElementById("eventInput").value;
+      if (!year || !text) {
+        alert("Please enter at least Year and Event.");
+        return;
+      }
+      entries.push({ year: parseInt(year), date: date || "", text, color: getRandomColor() });
+      document.getElementById("yearInput").value = "";
+      document.getElementById("dateInput").value = "";
+      document.getElementById("eventInput").value = "";
+      renderTimeline();
+    }
+
+    function editEntry(index) {
+      const entry = entries[index];
+      const newYear = prompt("Edit Year:", entry.year);
+      const newDate = prompt("Edit Date:", entry.date);
+      const newText = prompt("Edit Event:", entry.text);
+      if (newYear && newText) {
+        entries[index] = { ...entry, year: parseInt(newYear), date: newDate, text: newText };
+        renderTimeline();
+      }
+    }
+
+    function deleteEntry(index) {
+      entries.splice(index, 1);
+      renderTimeline();
+    }
+
+    function clearAll() {
+      if (confirm("Clear all entries?")) {
+        entries = [];
+        renderTimeline();
+      }
+    }
+
+    function exportJSON() {
+      const blob = new Blob([JSON.stringify(entries, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "timeline.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importJSON() {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json";
+      input.onchange = e => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = event => {
+          try {
+            entries = JSON.parse(event.target.result);
+            renderTimeline();
+          } catch (err) {
+            alert("Invalid JSON file!");
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    }
+
+    function exportPNG() {
+      html2canvas(document.getElementById("timeline")).then(canvas => {
+        const link = document.createElement("a");
+        link.download = "timeline.png";
+        link.href = canvas.toDataURL("image/png", 1.0);
+        link.click();
+      });
+    }
+
+    function exportPDF() {
+      html2canvas(document.getElementById("timeline")).then(canvas => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF("p", "pt", "a4");
+        const imgData = canvas.toDataURL("image/png", 1.0);
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save("timeline.pdf");
+      });
+    }
+
+    // Allow quick entry with Enter key
+    document.addEventListener("keydown", e => {
+      if (e.key === "Enter") addEntry();
+    });
+  </script>
+</body>
+</html>
