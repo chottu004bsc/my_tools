@@ -19,7 +19,7 @@
     if(entered !== validLicense){
         document.body.innerHTML = "<h2 style='color:red;text-align:center;'>❌ Invalid License. Contact IIntellectual Space - www.iintellectualspace.com</h2>";
     }
-    else if(usageCount > 50){
+    else if(usageCount > 500){
         document.body.innerHTML = "<h2 style='color:red;text-align:center;'>⚠️ License Expired (Max usage reached). Contact IIntellectual Space - www.iintellectualspace.com</h2>";
     }
     else {
