@@ -11,23 +11,15 @@
         entered = userCode;
     }
 
-    // Count usage
-    var usageCount = parseInt(localStorage.getItem("usage_count") || "0");
-    usageCount++;
-    localStorage.setItem("usage_count", usageCount);
-
     if(entered !== validLicense){
         document.body.innerHTML = "<h2 style='color:red;text-align:center;'>❌ Invalid License. Contact IIntellectual Space - www.iintellectualspace.com</h2>";
-    }
-    else if(usageCount > 500){
-        document.body.innerHTML = "<h2 style='color:red;text-align:center;'>⚠️ License Expired (Max usage reached). Contact IIntellectual Space - www.iintellectualspace.com</h2>";
     }
     else {
         // Add watermark
         var style = document.createElement("style");
         style.innerHTML = `
           body::after {
-            content: "Licensed Copy - ${validLicense} | IIntellectual Space - www.iintellectualspace.com (Used ${usageCount}/100)";
+            content: "Licensed Copy - ${validLicense} | IIntellectual Space - www.iintellectualspace.com";
             position: fixed;
             bottom: 5px;
             right: 5px;
