@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Tool</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    /* Copyright Banner */
+    #copyright-banner {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      font-size: 14px;
+      text-align: center;
+      padding: 5px;
+      z-index: 99999;
+      pointer-events: none; /* User click disable */
+    }
+    #copyright-banner img {
+      height: 18px;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Your Page Content Here -->
+  <h1 style="text-align:center;margin-top:50px;">🚀 Welcome to My Tool</h1>
+  <p style="text-align:center;">This is a demo content area.</p>
+
+  <!-- Copyright Banner -->
+  <div id="copyright-banner">
+    <img src="yourlogo.png" alt="Logo">
+    <span> © 2025 I Am An IAS Academy - Licensed Copy </span>
+  </div>
+
+  <script>
+    /***********************
+     LICENSE SYSTEM
+    ************************/
+    // 🔑 Assign unique license key for each customer
+    const LICENSE_KEY = "ABC123-XYZ789"; 
+
+    // Ask user to enter license on first load
+    let userKey = sessionStorage.getItem("licenseKey");
+    if (!userKey) {
+      userKey = prompt("Enter License Key:");
+      sessionStorage.setItem("licenseKey", userKey);
+    }
+
+    // Invalid key => block usage
+    if (userKey !== LICENSE_KEY) {
+      document.body.innerHTML = "<h2 style='color:red;text-align:center;margin-top:50px;'>⚠️ Invalid License. Unauthorized Copy!</h2>";
+      throw new Error("Invalid License");
+    }
+
+    /***********************
+     ANTI-TAMPER CHECK
+    ************************/
+    setInterval(() => {
+      if (!document.getElementById("copyright-banner")) {
+        document.body.innerHTML = "<h2 style='color:red;text-align:center;margin-top:50px;'>⚠️ Tampering Detected! Copyright removed.</h2>";
+        throw new Error("Tampering Detected");
+      }
+    }, 2000);
+  </script>
+</body>
+</html>
